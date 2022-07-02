@@ -1,17 +1,13 @@
-import {
-  BaseEntity,
-  Column,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { BaseEntity, Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 import { GumbyGuild } from './GumbyGuild';
 
 @Entity()
 export class PermanentChannel extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryColumn()
+  id: string;
+
+  @Column()
+  name: string;
 
   @ManyToOne(() => GumbyGuild, guild => guild.permanents)
   guild: Promise<GumbyGuild>;

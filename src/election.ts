@@ -29,6 +29,7 @@ export const initElection = async () => {
         const election = new GumbyElection();
         election.month = date.month;
         election.year = date.year;
+        election.guildId = '980215156581732412';
         await election.save();
       }
     } else {
