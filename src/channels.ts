@@ -1,9 +1,4 @@
-import {
-  Collection,
-  Guild,
-  NonThreadGuildBasedChannel,
-  OAuth2Guild,
-} from 'discord.js';
+import { Collection, NonThreadGuildBasedChannel } from 'discord.js';
 import { discordClient } from './discord';
 import { GumbyGuild } from './entities/GumbyGuild';
 import { PermanentChannel } from './entities/PermanentChannel';
@@ -15,32 +10,25 @@ export const permanentChannels = ['general', 'rules', 'development', 'bot'];
 export const initChannels = async () => {
   const guilds = (await discordClient.guilds.fetch()).map(oauth => oauth);
   for (const oauth of guilds) {
-    let data = await GumbyGuild.findOneBy({ id: oauth.id });
-    data = data || new GumbyGuild();
-    const guildMap = new Map(
-      (await data.permanents).map(channel => [channel.id, channel])
+    const data = await PermanentChannel.findBy({ guildId: oauth.id });
+    const names = data.map(channel => channel.name);
+    const newChannels = permanentChannels.filter(name => !(name in names)); // If there's not a channel listed in this here, we've got to make them.
+    if (newChannels.length == 0) return;
+    const guild = await oauth.fetch();
+    const channels = (await guild.channels.fetch()).flatMap((channel, _, c) =>
+      c.set(channel.name, channel)
     );
-    let channelMap: Collection<string, NonThreadGuildBasedChannel> | null =
-      null;
-    for (const name of permanentChannels) {
-      if (!guildMap.has(name)) {
-        const guild = await oauth.fetch();
-        const gumby = await getGumby(guild);
-        channelMap =
-          channelMap ||
-          (await guild.channels.fetch()).flatMap((channel, key, collection) =>
-            collection.set(channel.name, channel)
-          );
-        let similarChannel = channelMap.get(name);
-        similarChannel =
-          similarChannel ||
-          (await guild.channels.create(name, { type: 'GUILD_TEXT' }));
-        similarChannel.permissionOverwrites.create(gumby, {
-          MANAGE_CHANNELS: false,
-        });
-      }
+    const gumby = await getGumby(guild);
+    for (const channelName of newChannels) {
+      let channel = channels.get(channelName);
+      channel =
+        channel ||
+        (await guild.channels.create(channelName, {
+          type: 'GUILD_TEXT',
+        }));
+      channel.permissionOverwrites.create(gumby, {
+        MANAGE_CHANNELS: false,
+      });
     }
   }
 };
-
-discordClient.on('ready', initChannels);

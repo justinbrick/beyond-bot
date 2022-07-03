@@ -5,6 +5,7 @@ import { Client, CommandInteraction, Intents } from 'discord.js';
 import { readdir } from 'fs/promises';
 import { join } from 'path';
 import { cwd } from 'process';
+import { initGuilds } from './guilds';
 
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
 
@@ -13,6 +14,7 @@ export const discordClient = new Client({ intents: [Intents.FLAGS.GUILDS] });
 
 discordClient.once('ready', () => {
   console.log('Ready!');
+  initGuilds();
 });
 
 type Command = {

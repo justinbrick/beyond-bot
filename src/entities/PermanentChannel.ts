@@ -9,6 +9,6 @@ export class PermanentChannel extends BaseEntity {
   @Column()
   name: string;
 
-  @ManyToOne(() => GumbyGuild, guild => guild.permanents)
-  guild: Promise<GumbyGuild>;
+  @Column()
+  guildId: string;
 }

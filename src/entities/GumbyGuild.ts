@@ -5,7 +5,4 @@ import { PermanentChannel } from './PermanentChannel';
 export class GumbyGuild extends BaseEntity {
   @PrimaryColumn()
   id: string;
-
-  @OneToMany(() => PermanentChannel, channel => channel.guild)
-  permanents: Promise<PermanentChannel[]>;
 }

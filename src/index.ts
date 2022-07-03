@@ -12,7 +12,7 @@ const start = async () => {
   console.log('Connecting to database.');
   await initDb();
   await initDiscord();
-  await initElection();
+  //await initElection();
 };
 
 start();
