@@ -8,7 +8,11 @@ export const data = new SlashCommandBuilder()
   .setDescription('Ends the gumby vote');
 
 export const execute = async (interaction: CommandInteraction) => {
-  const election = await GumbyElection.getCurrent();
+  if (!interaction.guild) {
+    interaction.reply('You must end this vote within a guild!');
+    return;
+  }
+  const election = await GumbyElection.getCurrent(interaction.guild);
   if (!election) return;
 
   const votes = await GumbyVote.find({

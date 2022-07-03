@@ -4,47 +4,70 @@ import { DateTime } from 'luxon';
 import { TextChannel } from 'discord.js';
 import { getCurrentTime } from './time';
 import { GumbyVote } from './entities/GumbyVote';
+import { PermanentChannel } from './entities/PermanentChannel';
+import { GumbyGuild } from './entities/GumbyGuild';
+import { getGumby } from './entities/GumbyRole';
 
 export const initElection = async () => {
   const electionTimer = async () => {
     const date = getCurrentTime();
+    const oldDate = date.minus({ months: 1 });
     const nextMonth = date.startOf('month').plus({ months: 1 });
 
-    // if we're in the last week of the month
-    if (date.day >= date.daysInMonth - 7) {
-      const existingElection = await GumbyElection.findOne({
-        where: { year: date.year, month: date.month },
+    const guilds = await GumbyGuild.createQueryBuilder('guild')
+      .select('guild')
+      .getMany();
+    console.log(guilds.length);
+    for (const guild of guilds) {
+      const electionChannel = await PermanentChannel.findOneBy({
+        guildId: guild.id,
+        name: 'bot', // This will find the bot channel, for testing.
       });
-
-      if (!existingElection) {
-        const channel = discordClient.channels.cache.get('992859469237207041');
-        if (channel instanceof TextChannel) {
-          channel.send(
-            `The new Gumby election has started for the month of ${nextMonth.toFormat(
-              'LLLL'
-            )}, ${nextMonth.year}!`
-          );
-        }
-
-        const election = new GumbyElection();
-        election.month = date.month;
-        election.year = date.year;
-        election.guildId = '980215156581732412';
-        await election.save();
-      }
-    } else {
-      const previousMonth = date.startOf('month').minus({ months: 1 });
-      const election = await GumbyElection.findOne({
-        where: { month: previousMonth.month, year: previousMonth.year },
+      if (!electionChannel)
+        throw new Error(
+          'Was unable to find the election channel for a Guild! Something is seriously wrong!'
+        );
+      // Creating a new election to compensate for the old one if there wasn't one previously.
+      // This will override the next election period as well, so that there aren't any conflicts.
+      let oldElection = await GumbyElection.findOneBy({
+        guildId: guild.id,
+        year: oldDate.year,
+        month: oldDate.month,
       });
-
-      if (!election) return;
-
-      if (!election.winner) {
-        const votes = await GumbyVote.find({
-          where: { election: { id: election.id } },
+      console.log('Are we still here?');
+      if (!oldElection) {
+        oldElection = await GumbyElection.findOneBy({
+          guildId: guild.id,
+          year: date.year,
+          month: date.month,
         });
+        // If there's still not a guild election, that means we have to create a compensation one.
+        if (!oldElection) {
+          oldElection = new GumbyElection();
+          oldElection.startDate = date.toISODate();
+          oldElection.guildId = guild.id;
+          oldElection.month = date.month;
+          oldElection.year = date.year;
+          oldElection.save();
+          const channelObject = await discordClient.channels.fetch(
+            electionChannel.id
+          );
+          if (channelObject instanceof TextChannel) {
+            channelObject.send(
+              'A delayed election has been created, and will last for 7 days! Please vote for Gumby of the Month!'
+            );
+          }
+        }
+      }
 
+      // If the old election has not decided a winner, and the difference between days is more than 7.
+      if (
+        !oldElection.winner &&
+        date.diff(DateTime.fromISO(oldElection.startDate)).days > 7
+      ) {
+        const votes = await GumbyVote.find({
+          where: { election: { id: oldElection.id } },
+        });
         const candidates: Record<string, number> = {};
 
         for (const vote of votes) {
@@ -56,28 +79,43 @@ export const initElection = async () => {
         }
 
         const entries = Object.entries(candidates).sort((a, b) => b[1] - a[1]);
-
-        if (entries.length === 0) {
-          return;
-        }
-
+        if (entries.length === 0) return;
         const winner = entries[0][0];
-
-        election.winner = winner;
-        await election.save();
-
-        const channel = discordClient.channels.cache.get('992859469237207041');
-        if (channel instanceof TextChannel) {
-          channel.send(
-            `The new Gumby election has ended and the winner is <@${winner}>!`
+        const guildObject = await discordClient.guilds.fetch(guild.id);
+        const gumby = await getGumby(guildObject);
+        gumby.members.forEach(member =>
+          member.roles.remove(gumby, 'Old Gumby!')
+        );
+        const winnerMember = await guildObject.members.fetch(winner);
+        winnerMember.roles.add(gumby, 'New Gumby!');
+        const channelObject = guildObject.channels.fetch(electionChannel.id);
+        if (channelObject instanceof TextChannel)
+          channelObject.send(
+            `Gumby of the Month has been elected! Congratulations, <@${winner}>`
           );
+        oldElection.winner = winner;
+        oldElection.save();
+      }
 
-          // set their roles and shit here
-        }
+      // Creating a new election if there are 7 days left in the month.
+      // If there has been a compensatory election, this won't create a new one.
+      let election = await GumbyElection.findOneBy({
+        guildId: guild.id,
+        year: date.year,
+        month: date.month,
+      });
+      // If there's not an election for the current month and there's 7 days left, we create one so that there's some free time in between.
+      if (!election && date.day >= date.daysInMonth - 7) {
+        election = new GumbyElection();
+        election.startDate = date.toISODate();
+        election.guildId = guild.id;
+        election.month = date.month;
+        election.year = date.year;
+        election.save();
       }
     }
   };
 
   electionTimer();
-  setInterval(electionTimer, 30 * 1000);
+  setInterval(electionTimer, 1000 * 60 * 60);
 };

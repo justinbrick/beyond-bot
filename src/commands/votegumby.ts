@@ -2,6 +2,7 @@ import { GumbyVote } from './../entities/GumbyVote';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction, GuildMember, Interaction } from 'discord.js';
 import { GumbyElection } from '../entities/GumbyElection';
+import { getCurrentTime } from '../time';
 
 export const data = new SlashCommandBuilder()
   .setName('votegumby')
@@ -11,11 +12,23 @@ export const data = new SlashCommandBuilder()
   );
 
 export const execute = async (interaction: CommandInteraction) => {
-  console.log('executing votegumby');
+  if (!interaction.guild) {
+    interaction.reply(
+      'You are not voting within a guild! Please vote within any channel of the guild.'
+    );
+    return;
+  }
+  const date = getCurrentTime();
+  const election = await GumbyElection.findOneBy({
+    guildId: interaction.guild.id,
+    year: date.year,
+    month: date.month,
+  });
 
-  const election = await GumbyElection.getCurrent();
-  if (!election) {
-    interaction.reply('Could not find the current election!');
+  if (!election || election.winner) {
+    interaction.reply(
+      'There is currently not an election going on! If you believe this is an error, contact the developer, or cry about it!'
+    );
     return;
   }
 

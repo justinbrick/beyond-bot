@@ -1,20 +1,28 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import {
+  SelectMenuOptionBuilder,
+  SlashCommandBuilder,
+} from '@discordjs/builders';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v10';
 import { Client, CommandInteraction, Intents } from 'discord.js';
 import { readdir } from 'fs/promises';
 import { join } from 'path';
 import { cwd } from 'process';
+import { initChannels } from './channels';
+import { initElection } from './election';
 import { initGuilds } from './guilds';
-
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
 
 export const discordRest = new REST({ version: '9' }).setToken(DISCORD_TOKEN);
 export const discordClient = new Client({ intents: [Intents.FLAGS.GUILDS] });
 
-discordClient.once('ready', () => {
+discordClient.once('ready', async () => {
   console.log('Ready!');
-  initGuilds();
+
+  await initGuilds();
+  await initChannels();
+
+  await initElection();
 });
 
 type Command = {
