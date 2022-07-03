@@ -1,5 +1,5 @@
-import { discordClient } from './discord';
 import { initChannels } from './channels';
+import { discordClient } from './discord';
 import { GumbyGuild } from './entities/GumbyGuild';
 
 export const initGuilds = async () => {
@@ -11,6 +11,6 @@ export const initGuilds = async () => {
     }
     const data = new GumbyGuild();
     data.id = guild[0];
-    data.save();
+    await data.save();
   }
 };

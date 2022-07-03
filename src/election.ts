@@ -1,14 +1,17 @@
+import { TextChannel } from 'discord.js';
+import { DateTime } from 'luxon';
+
 import { discordClient } from './discord';
 import { GumbyElection } from './entities/GumbyElection';
-import { DateTime } from 'luxon';
-import { TextChannel } from 'discord.js';
-import { getCurrentTime } from './time';
-import { GumbyVote } from './entities/GumbyVote';
-import { PermanentChannel } from './entities/PermanentChannel';
 import { GumbyGuild } from './entities/GumbyGuild';
 import { getGumby } from './entities/GumbyRole';
+import { GumbyVote } from './entities/GumbyVote';
+import { PermanentChannel } from './entities/PermanentChannel';
+import { getCurrentTime } from './time';
 
 export const initElection = async () => {
+  console.log('initElection');
+
   const electionTimer = async () => {
     const date = getCurrentTime();
     const oldDate = date.minus({ months: 1 });
@@ -34,7 +37,6 @@ export const initElection = async () => {
         year: oldDate.year,
         month: oldDate.month,
       });
-      console.log('Are we still here?');
       if (!oldElection) {
         oldElection = await GumbyElection.findOneBy({
           guildId: guild.id,
@@ -48,7 +50,7 @@ export const initElection = async () => {
           oldElection.guildId = guild.id;
           oldElection.month = date.month;
           oldElection.year = date.year;
-          oldElection.save();
+          await oldElection.save();
           const channelObject = await discordClient.channels.fetch(
             electionChannel.id
           );
@@ -94,7 +96,7 @@ export const initElection = async () => {
             `Gumby of the Month has been elected! Congratulations, <@${winner}>`
           );
         oldElection.winner = winner;
-        oldElection.save();
+        await oldElection.save();
       }
 
       // Creating a new election if there are 7 days left in the month.
@@ -111,7 +113,7 @@ export const initElection = async () => {
         election.guildId = guild.id;
         election.month = date.month;
         election.year = date.year;
-        election.save();
+        await election.save();
       }
     }
   };
