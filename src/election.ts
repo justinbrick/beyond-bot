@@ -4,14 +4,12 @@ import { DateTime } from 'luxon';
 import { discordClient } from './discord';
 import { GumbyElection } from './entities/GumbyElection';
 import { GumbyGuild } from './entities/GumbyGuild';
-import { getGumby } from './entities/GumbyRole';
+import { getGumby, GumbyRole } from './entities/GumbyRole';
 import { GumbyVote } from './entities/GumbyVote';
 import { PermanentChannel } from './entities/PermanentChannel';
 import { getCurrentTime } from './time';
 
 export const initElection = async () => {
-  console.log('initElection');
-
   const electionTimer = async () => {
     const date = getCurrentTime();
     const oldDate = date.minus({ months: 1 });
@@ -20,7 +18,6 @@ export const initElection = async () => {
     const guilds = await GumbyGuild.createQueryBuilder('guild')
       .select('guild')
       .getMany();
-    console.log(guilds.length);
     for (const guild of guilds) {
       const electionChannel = await PermanentChannel.findOneBy({
         guildId: guild.id,
@@ -30,6 +27,30 @@ export const initElection = async () => {
         throw new Error(
           'Was unable to find the election channel for a Guild! Something is seriously wrong!'
         );
+      // Creating a new election if there are 7 days left in the month.
+      // If there has been a compensatory election, this won't create a new one.
+      let election = await GumbyElection.findOneBy({
+        guildId: guild.id,
+        year: date.year,
+        month: date.month,
+      });
+      // If there's not an election for the current month and there's 7 days left, we create one so that there's some free time in between.
+      if (!election && date.day >= date.daysInMonth - 7) {
+        election = new GumbyElection();
+        election.startDate = date.toISODate();
+        console.log('But instead, through here.');
+        election.guildId = guild.id;
+        election.month = date.month;
+        election.year = date.year;
+        const channelObject = await discordClient.channels.fetch(
+          electionChannel.id
+        );
+        if (channelObject instanceof TextChannel)
+          await channelObject.send(
+            `A new election has started for ${nextMonth.monthLong}! Cast your votes now!`
+          );
+        await election.save();
+      }
       // Creating a new election to compensate for the old one if there wasn't one previously.
       // This will override the next election period as well, so that there aren't any conflicts.
       let oldElection = await GumbyElection.findOneBy({
@@ -65,7 +86,7 @@ export const initElection = async () => {
       // If the old election has not decided a winner, and the difference between days is more than 7.
       if (
         !oldElection.winner &&
-        date.diff(DateTime.fromISO(oldElection.startDate)).days > 7
+        date.diff(DateTime.fromISO(oldElection.startDate), 'days').days > 7
       ) {
         const votes = await GumbyVote.find({
           where: { election: { id: oldElection.id } },
@@ -81,39 +102,23 @@ export const initElection = async () => {
         }
 
         const entries = Object.entries(candidates).sort((a, b) => b[1] - a[1]);
-        if (entries.length === 0) return;
+        if (entries.length === 0) continue;
         const winner = entries[0][0];
         const guildObject = await discordClient.guilds.fetch(guild.id);
-        const gumby = await getGumby(guildObject);
-        gumby.members.forEach(member =>
-          member.roles.remove(gumby, 'Old Gumby!')
+        const gumby = await GumbyRole.getRole(guildObject);
+        const winnerObject = await guildObject.members.fetch(winner);
+        await gumby.setCurrent(winnerObject);
+        const channelObject = await guildObject.channels.fetch(
+          electionChannel.id
         );
-        const winnerMember = await guildObject.members.fetch(winner);
-        winnerMember.roles.add(gumby, 'New Gumby!');
-        const channelObject = guildObject.channels.fetch(electionChannel.id);
-        if (channelObject instanceof TextChannel)
-          channelObject.send(
+        if (channelObject instanceof TextChannel) {
+          await channelObject.send(
             `Gumby of the Month has been elected! Congratulations, <@${winner}>`
           );
+        }
+
         oldElection.winner = winner;
         await oldElection.save();
-      }
-
-      // Creating a new election if there are 7 days left in the month.
-      // If there has been a compensatory election, this won't create a new one.
-      let election = await GumbyElection.findOneBy({
-        guildId: guild.id,
-        year: date.year,
-        month: date.month,
-      });
-      // If there's not an election for the current month and there's 7 days left, we create one so that there's some free time in between.
-      if (!election && date.day >= date.daysInMonth - 7) {
-        election = new GumbyElection();
-        election.startDate = date.toISODate();
-        election.guildId = guild.id;
-        election.month = date.month;
-        election.year = date.year;
-        await election.save();
       }
     }
   };
