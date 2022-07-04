@@ -11,7 +11,7 @@ jobs:
           host: ${{ secrets.HOST }}
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
-          username: ${{ secret.USERNAME }}
+          username: ${{ secrets.USERNAME }}
           script: |
             cd ~/beyond
             git pull
