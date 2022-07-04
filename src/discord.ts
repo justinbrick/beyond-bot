@@ -17,8 +17,6 @@ export const discordRest = new REST({ version: '9' }).setToken(DISCORD_TOKEN);
 export const discordClient = new Client({ intents: [Intents.FLAGS.GUILDS] });
 
 discordClient.once('ready', async () => {
-  console.log('Ready!');
-
   await initGuilds();
   await initChannels();
   await initElection();
