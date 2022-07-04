@@ -4,7 +4,7 @@ import { DateTime } from 'luxon';
 import { discordClient } from './discord';
 import { GumbyElection } from './entities/GumbyElection';
 import { GumbyGuild } from './entities/GumbyGuild';
-import { getGumby, GumbyRole } from './entities/GumbyRole';
+import { GumbyRole } from './entities/GumbyRole';
 import { GumbyVote } from './entities/GumbyVote';
 import { PermanentChannel } from './entities/PermanentChannel';
 import { getCurrentTime } from './time';

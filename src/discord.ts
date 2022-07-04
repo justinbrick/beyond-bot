@@ -1,7 +1,4 @@
-import {
-  SelectMenuOptionBuilder,
-  SlashCommandBuilder,
-} from '@discordjs/builders';
+import { SlashCommandBuilder } from '@discordjs/builders';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v10';
 import { Client, CommandInteraction, Intents } from 'discord.js';

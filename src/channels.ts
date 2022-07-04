@@ -1,5 +1,3 @@
-import { Collection, Guild, NonThreadGuildBasedChannel } from 'discord.js';
-
 import { discordClient } from './discord';
 import { getGumby } from './entities/GumbyRole';
 import { PermanentChannel } from './entities/PermanentChannel';

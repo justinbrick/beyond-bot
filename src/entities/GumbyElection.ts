@@ -1,5 +1,4 @@
 import { getCurrentTime } from './../time';
-import { DateTime } from 'luxon';
 import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { Guild } from 'discord.js';
 

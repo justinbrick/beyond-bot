@@ -1,11 +1,5 @@
 import { Guild, GuildMember, Role } from 'discord.js';
-import {
-  BaseEntity,
-  Column,
-  Entity,
-  PrimaryColumn,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
 import { discordClient } from '../discord';
 
 @Entity()

@@ -1,6 +1,6 @@
 import { GumbyVote } from './../entities/GumbyVote';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction, GuildMember, Interaction, User } from 'discord.js';
+import { CommandInteraction, GuildMember, User } from 'discord.js';
 import { GumbyElection } from '../entities/GumbyElection';
 import { getCurrentTime } from '../time';
 

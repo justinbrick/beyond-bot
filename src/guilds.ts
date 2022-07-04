@@ -1,4 +1,3 @@
-import { initChannels } from './channels';
 import { discordClient } from './discord';
 import { GumbyGuild } from './entities/GumbyGuild';
 
