@@ -10,7 +10,7 @@ export const initDb = async () => {
     database: join(cwd(), 'db.sqlite'),
     entities: [join(cwd(), 'build', 'entities', '**', '*.js')],
     synchronize: true,
-    dropSchema: true,
+    //dropSchema: true,
   });
 
   await AppDataSource.initialize()

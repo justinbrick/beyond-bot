@@ -21,7 +21,6 @@ discordClient.once('ready', async () => {
 
   await initGuilds();
   await initChannels();
-
   await initElection();
 });
 
@@ -37,6 +36,7 @@ discordClient.on('interactionCreate', async interaction => {
 
   console.log('interaction!');
 
+  /*
   if (
     !['496802506769170432', '214474420423622657'].includes(
       interaction.member!.user.id
@@ -45,6 +45,7 @@ discordClient.on('interactionCreate', async interaction => {
     console.log('bad user', interaction.member!.user.id);
     return;
   }
+  */
 
   const command = commands.find(
     command => command.data.name == interaction.commandName

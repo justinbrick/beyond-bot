@@ -1,6 +1,6 @@
 import { GumbyVote } from './../entities/GumbyVote';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction, GuildMember, Interaction } from 'discord.js';
+import { CommandInteraction, GuildMember, Interaction, User } from 'discord.js';
 import { GumbyElection } from '../entities/GumbyElection';
 import { getCurrentTime } from '../time';
 
@@ -26,7 +26,7 @@ export const execute = async (interaction: CommandInteraction) => {
   });
 
   if (!election || election.winner) {
-    interaction.reply(
+    await interaction.reply(
       'There is currently not an election going on! If you believe this is an error, contact the developer, or cry about it!'
     );
     return;
@@ -43,14 +43,16 @@ export const execute = async (interaction: CommandInteraction) => {
     });
     if (existingVote) {
       if (existingVote.candidate === member.user.id) {
-        interaction.reply('Your vote is already cast for that candidate.');
+        await interaction.reply(
+          'Your vote is already cast for that candidate.'
+        );
         return;
       }
 
       existingVote.candidate = member.user.id;
       await existingVote.save();
 
-      interaction.reply('Your vote has been re-cast!');
+      await interaction.reply('Your vote has been re-cast!');
       return;
     }
 
@@ -59,7 +61,6 @@ export const execute = async (interaction: CommandInteraction) => {
     vote.election = Promise.resolve(election);
     vote.voter = interaction.member!.user.id;
     await vote.save();
-
-    interaction.reply(`Your vote has been cast!`);
+    await interaction.reply(`Your vote has been cast!`);
   }
 };
