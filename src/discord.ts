@@ -34,8 +34,6 @@ const commands: Array<Command> = [];
 discordClient.on('interactionCreate', async interaction => {
   if (!interaction.isCommand()) return;
 
-  console.log('interaction!');
-
   /*
   if (
     !['496802506769170432', '214474420423622657'].includes(

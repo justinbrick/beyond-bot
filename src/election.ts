@@ -38,7 +38,6 @@ export const initElection = async () => {
       if (!election && date.day >= date.daysInMonth - 7) {
         election = new GumbyElection();
         election.startDate = date.toISODate();
-        console.log('But instead, through here.');
         election.guildId = guild.id;
         election.month = date.month;
         election.year = date.year;

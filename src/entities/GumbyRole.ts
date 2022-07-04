@@ -20,7 +20,6 @@ export class GumbyRole extends BaseEntity {
   current?: string;
 
   async setCurrent(member: GuildMember) {
-    console.log(this.current);
     const guild = await discordClient.guilds.fetch(this.guildId);
     const gumby = await guild.roles.fetch(this.id);
     if (!gumby) {
@@ -29,7 +28,6 @@ export class GumbyRole extends BaseEntity {
       );
     }
     if (this.current) {
-      console.log("We're removing the old member here!");
       const oldMember = await guild.members.fetch(this.current);
       await oldMember.roles.remove(gumby, 'Old Gumby!'); // Remove the current role from the old gumby of the month.
     }
@@ -41,7 +39,6 @@ export class GumbyRole extends BaseEntity {
 
   static async getRole(guild: Guild) {
     let data = await GumbyRole.findOneBy({ guildId: guild.id });
-    console.log(data);
     if (!data) {
       let role: Role | undefined = (await guild.roles.fetch()).find(
         role => role.name == 'Gumby of the Month'
