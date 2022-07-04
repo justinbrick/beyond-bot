@@ -14,7 +14,9 @@ jobs:
           port: ${{ secrets.PORT }}
           script: |
             cd ~/beyond
+            npx pm2 kill index
             git pull
+            nvm use 16
             npm install
             yarn build
-            npx pm2 restart index
+            npx pm2 start index
