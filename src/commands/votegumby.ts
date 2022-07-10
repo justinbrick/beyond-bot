@@ -33,10 +33,9 @@ export const execute = async (interaction: CommandInteraction) => {
   }
 
   const member = interaction.options.getMentionable('member');
-
   if (
-    member instanceof User &&
-    (member.bot || member.id == interaction.user.id)
+    member instanceof GuildMember &&
+    (member.user.bot || member.id == interaction.user.id)
   ) {
     await interaction.reply(
       "You think you're a funny guy, huh? You think you've beaten the system? Well let me tell you what, pal, I'm tired of it, and things are gonna change around here. Now, go outside and start eating grass, and take a picture of your mouth full of grass. If you do not do so in the next 30 minutes, I'm banning you. Have fun bud."
