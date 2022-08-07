@@ -8,6 +8,7 @@ import { cwd } from 'process';
 import { initChannels } from './channels';
 import { initElection } from './election';
 import { initGuilds } from './guilds';
+import { inityGumby } from './gumby';
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
 
 export const discordRest = new REST({ version: '9' }).setToken(DISCORD_TOKEN);
@@ -17,6 +18,7 @@ discordClient.once('ready', async () => {
   await initGuilds();
   await initChannels();
   await initElection();
+  await inityGumby();
 });
 
 type Command = {

@@ -1,6 +1,7 @@
 import { Guild, GuildMember, Role } from 'discord.js';
 import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
 import { discordClient } from '../discord';
+import { permissionsSet } from '../gumby';
 
 @Entity()
 export class GumbyRole extends BaseEntity {
@@ -12,6 +13,9 @@ export class GumbyRole extends BaseEntity {
 
   @Column('text', { nullable: true })
   current?: string;
+
+  @Column('unsigned big int', { nullable: true })
+  permissionFlags?: bigint;
 
   async setCurrent(member: GuildMember) {
     const guild = await discordClient.guilds.fetch(this.guildId);
@@ -43,13 +47,7 @@ export class GumbyRole extends BaseEntity {
           name: 'Gumby of the Month',
           color: 'PURPLE',
         }));
-      await role.setPermissions([
-        'MANAGE_CHANNELS',
-        'KICK_MEMBERS',
-        'MANAGE_EMOJIS_AND_STICKERS',
-        'MANAGE_THREADS',
-        'MANAGE_WEBHOOKS',
-      ]);
+      await role.setPermissions(permissionsSet);
       data = new GumbyRole();
       data.guildId = guild.id;
       data.id = role.id;
