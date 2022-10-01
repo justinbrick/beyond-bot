@@ -15,8 +15,7 @@ export const permissionsSet =
   Permissions.FLAGS.KICK_MEMBERS |
   Permissions.FLAGS.VIEW_AUDIT_LOG |
   Permissions.FLAGS.CREATE_INSTANT_INVITE |
-  Permissions.FLAGS.VIEW_GUILD_INSIGHTS |
-  Permissions.FLAGS.MANAGE_GUILD;
+  Permissions.FLAGS.VIEW_GUILD_INSIGHTS;
 
 export const gumbyRoleName = 'Gumby of the Month';
 

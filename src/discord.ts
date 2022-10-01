@@ -31,17 +31,6 @@ const commands: Array<Command> = [];
 discordClient.on('interactionCreate', async interaction => {
   if (!interaction.isCommand()) return;
 
-  /*
-  if (
-    !['496802506769170432', '214474420423622657'].includes(
-      interaction.member!.user.id
-    )
-  ) {
-    console.log('bad user', interaction.member!.user.id);
-    return;
-  }
-  */
-
   const command = commands.find(
     command => command.data.name == interaction.commandName
   );
