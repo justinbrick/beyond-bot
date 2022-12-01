@@ -34,4 +34,5 @@ export const execute = async (interaction: CommandInteraction) => {
   }
 
   await guild.setBanner(interaction.options.getAttachment('banner_image')!.url);
+  await interaction.reply('Successfully set the server banner!');
 };
