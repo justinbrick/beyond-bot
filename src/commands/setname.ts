@@ -37,4 +37,5 @@ export const execute = async (interaction: CommandInteraction) => {
 
   // Set the name of the guild with the guild name option
   await guild.setName(guildName, 'Gumby of the Month: Set Guild Name');
+  await interaction.reply('Successfully set the server name!');
 };
